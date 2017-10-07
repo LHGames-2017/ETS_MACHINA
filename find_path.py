@@ -80,7 +80,7 @@ def find_path_helper(grid, paths, target, seen, targetOnly=True):
         paths.append([Tile(tile.Content, tile.X, tile.Y-1), path + "^"])
         seen.append(grid[tile.X][tile.Y-1])
 
-    return find_path_helper(grid, paths, target, seen)
+    return find_path_helper(grid, paths, target, seen, targetOnly)
 
 def find_shortest_path(grid, start, target):
     return find_path_helper(grid, [[start, ""]], target, [start])
