@@ -1,6 +1,6 @@
 run:
 	sudo docker build . -t polyhx/python-test
-	sudo docker run -p 3000:3000 -t polyhx/python-test
+	sudo docker run --rm -it -p 3000:3000 -t polyhx/python-test
 
 build:
 	sudo docker build . -t
