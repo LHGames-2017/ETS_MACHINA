@@ -11,6 +11,8 @@ import state
 # map_name is just some uuid
 from uuid import getnode as map_name
 
+from find_path import a_star, find_closest_tile, find_shortest_path
+
 app = Flask(__name__)
 
 def deserialize_map(serialized_map):
@@ -36,6 +38,9 @@ def deserialize_map(serialized_map):
 
 state_machine = StateMachine()
 game_map = Map(map_name())
+
+def hud(player):
+    print player.Health, player.Position, player.Score, player.CarriedResources, player.CarryingCapacity
 
 def bot():
     """
@@ -78,6 +83,8 @@ def bot():
 
     game_map.update(player, deserialized_map)
     game_map.display()
+
+    hud(player)
 
     return state_machine.run(player, game_map, otherPlayers)
 

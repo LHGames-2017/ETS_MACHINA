@@ -26,11 +26,17 @@ class Point(object):
     def __add__(self, point):
         return Point(self.X + point.X, self.Y + point.Y)
 
+    def __eq__(self, point):
+        return self.X == point.X and self.Y == point.Y
+
     def __sub__(self, point):
         return Point(self.X - point.X, self.Y - point.Y)
 
     def __str__(self):
         return "{{{0}, {1}}}".format(self.X, self.Y)
+
+    def __hash__(self):
+        return hash(str(self))
 
     # Distance between two Points
     def Distance(self, p1, p2):

@@ -1,6 +1,6 @@
 from savemap import get_map, save_map
 import json
-from structs import TileContent, Tile
+from structs import TileContent, Tile, Point
 
 class Map:
     def __init__(self, name, default=-1):
@@ -39,7 +39,7 @@ class Map:
 
         return False
 
-    def at(point):
+    def at(self, point):
         return self.tiles[point.X][point.Y]
 
     def touch(self, player, tile_content):
