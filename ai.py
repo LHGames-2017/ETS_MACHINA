@@ -1,32 +1,19 @@
 from flask import Flask, request
 from structs import *
-from find_path import *
 import json
 import numpy
 
+from savemap import save_map, get_map
+from state import StateMachine
+from mapping import Map
+import state
+
+# map_name is just some uuid
+from uuid import getnode as map_name
+
+from find_path import a_star, find_closest_tile, find_shortest_path
+
 app = Flask(__name__)
-
-def create_action(action_type, target):
-    actionContent = ActionContent(action_type, target.__dict__)
-    return json.dumps(actionContent.__dict__)
-
-def create_move_action(target):
-    return create_action("MoveAction", target)
-
-def create_attack_action(target):
-    return create_action("AttackAction", target)
-
-def create_collect_action(target):
-    return create_action("CollectAction", target)
-
-def create_steal_action(target):
-    return create_action("StealAction", target)
-
-def create_heal_action():
-    return create_action("HealAction", "")
-
-def create_purchase_action(item):
-    return create_action("PurchaseAction", item)
 
 def deserialize_map(serialized_map):
     """
@@ -49,39 +36,11 @@ def deserialize_map(serialized_map):
 
     return deserialized_map
 
-entity = {
-    0: ' ',
-    1: '#',
-    2: 'H',
-    3: '~',
-    4: 'R',
-    5: 'S',
-    6: 'J'
-}
+state_machine = StateMachine()
+game_map = Map(map_name())
 
-def print_map(m):
-    #m = json.loads(m)[u"CustomSerializedMap"]
-    m = json.loads(m.replace('{', '[').replace('}', ']'))
-
-    for y in m:
-        out = []
-        for x in y:
-            out += [entity[x[0]]]
-        print ' '.join(out)
-
-def move_to_path(pos, path):
-    if len(path) == 0:
-        return pos
-    if path[0] == '^':
-        return Point(pos.X, pos.Y-1)
-    if path[0] == 'v':
-        return Point(pos.X, pos.Y+1)
-    if path[0] == '>':
-        return Point(pos.X+1, pos.Y)
-    if path[0] == '<':
-        return Point(pos.X-1, pos.Y)
-    # something went very wrong
-    return pos
+def hud(player):
+    print player.Health, player.Position, player.Score, player.CarriedResources, player.CarryingCapacity
 
 def bot():
     """
@@ -90,6 +49,7 @@ def bot():
     map_json = request.form["map"]
 
     # Player info
+
     encoded_map = map_json.encode()
     map_json = json.loads(encoded_map)
     p = map_json["Player"]
@@ -103,7 +63,6 @@ def bot():
 
     # Map
     serialized_map = map_json["CustomSerializedMap"]
-    print_map(serialized_map)
     deserialized_map = deserialize_map(serialized_map)
 
     otherPlayers = []
@@ -122,39 +81,12 @@ def bot():
 
             otherPlayers.append({player_name: player_info })
 
-    print "Resources"
-    print player.CarriedRessources
-    print player.CarryingCapacity
-    print "House pos:"
-    print player.HouseLocation.X
-    print player.HouseLocation.Y
-    print "Player pos:"
-    print player.Position.X
-    print player.Position.Y
+    game_map.update(player, deserialized_map)
+    game_map.display()
 
-    pos = player.Position
+    hud(player)
 
-
-    game_map = create_usable_map(deserialized_map, player.Position)
-    if player.CarriedRessources == player.CarryingCapacity:
-        path  = find_shortest_path(game_map, Tile(6, pos.X, pos.Y), Tile(2, player.HouseLocation.X, player.HouseLocation.Y))
-        point = move_to_path(player.Position, path)
-        return create_move_action(point)
-
-    path = find_closest_tile(game_map, Tile(6, player.Position.X, player.Position.Y), 4)
-    point = move_to_path(player.Position, path)
-    if len(path) == 0:
-        print "Collect!"
-        # find tile to collect
-        if game_map[pos.X+1][pos.Y].Content == 4:
-            return create_collect_action(game_map[pos.X+1][pos.Y])
-        if game_map[pos.X-1][pos.Y].Content == 4:
-            return create_collect_action(game_map[pos.X-1][pos.Y])
-        if game_map[pos.X][pos.Y+1].Content == 4:
-            return create_collect_action(game_map[pos.X][pos.Y+1])
-        if game_map[pos.X][pos.Y-1].Content == 4:
-            return create_collect_action(game_map[pos.X][pos.Y-1])
-    return create_move_action(point)
+    return state_machine.run(player, game_map, otherPlayers)
 
 @app.route("/", methods=["POST"])
 def reponse():
@@ -164,4 +96,4 @@ def reponse():
     return bot()
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=3000)
+    app.run(host="0.0.0.0", port=8080)

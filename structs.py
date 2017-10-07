@@ -15,7 +15,6 @@ class TileType():
 class TileContent():
     Empty, Wall, House, Lava, Resource, Shop, Player = range(7)
 
-
 class Point(object):
 
     # Constructor
@@ -27,11 +26,17 @@ class Point(object):
     def __add__(self, point):
         return Point(self.X + point.X, self.Y + point.Y)
 
+    def __eq__(self, point):
+        return self.X == point.X and self.Y == point.Y
+
     def __sub__(self, point):
         return Point(self.X - point.X, self.Y - point.Y)
 
     def __str__(self):
         return "{{{0}, {1}}}".format(self.X, self.Y)
+
+    def __hash__(self):
+        return hash(str(self))
 
     # Distance between two Points
     def Distance(self, p1, p2):
@@ -56,17 +61,16 @@ class Tile(object):
         self.X = x
         self.Y = y
 
-
 class Player(object):
 
-    def __init__(self, health, maxHealth, position, houseLocation, score, carriedRessources,
+    def __init__(self, health, maxHealth, position, houseLocation, score, carriedResources,
                  carryingCapacity=1000):
         self.Health = health
         self.MaxHealth = maxHealth
         self.Position = position
         self.HouseLocation = houseLocation
         self.Score = score
-        self.CarriedRessources = carriedRessources
+        self.CarriedResources = carriedResources
         self.CarryingCapacity = carryingCapacity
 
 
@@ -78,7 +82,6 @@ class PlayerInfo(object):
         self.Position = position
 
 class ActionContent(object):
-
     def __init__(self, action_name, content):
         self.ActionName = action_name
         self.Content = str(content)
