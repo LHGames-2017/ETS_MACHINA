@@ -53,10 +53,10 @@ entity = {
     0: ' ',
     1: '#',
     2: 'H',
-    3: 'P',
+    3: '~',
     4: 'R',
-    5: '~',
-    6: 'S'
+    5: 'S',
+    6: 'J'
 }
 
 def print_map(m):
@@ -98,7 +98,7 @@ def bot():
     y = pos["Y"]
     house = p["HouseLocation"]
     player = Player(p["Health"], p["MaxHealth"], Point(x,y),
-                    Point(house["X"], house["Y"]),
+                    Point(house["X"], house["Y"]), p["Score"],
                     p["CarriedResources"], p["CarryingCapacity"])
 
     # Map
@@ -119,25 +119,39 @@ def bot():
 
             otherPlayers.append({player_name: player_info })
 
-    target = None
-    pos = None
-    for tiles in deserialized_map:
-        for tile in tiles:
-            if tile.Content == 2:
-                target = tile
-            if tile.X == player.Position.X and tile.Y == player.Position.Y:
-                pos = tile
+    print "Resources"
+    print player.CarriedRessources
+    print player.CarryingCapacity
+    print "House pos:"
+    print player.HouseLocation.X
+    print player.HouseLocation.Y
+    print "Player pos:"
+    print player.Position.X
+    print player.Position.Y
 
-    if target != None and pos != None:
-        game_map = create_usable_map(deserialized_map, player.Position)
-        path = find_closest_tile(game_map, pos, 2)
-        print path
-        #path  = find_shortest_path(game_map, pos, target)
+    pos = player.Position
+
+
+    game_map = create_usable_map(deserialized_map, player.Position)
+    if player.CarriedRessources == player.CarryingCapacity:
+        path  = find_shortest_path(game_map, Tile(6, pos.X, pos.Y), Tile(2, player.HouseLocation.X, player.HouseLocation.Y))
         point = move_to_path(player.Position, path)
         return create_move_action(point)
 
-    # return decision
-    return create_move_action(Point(0,1))
+    path = find_closest_tile(game_map, Tile(6, player.Position.X, player.Position.Y), 4)
+    point = move_to_path(player.Position, path)
+    if len(path) == 0:
+        print "Collect!"
+        # find tile to collect
+        if game_map[pos.X+1][pos.Y].Content == 4:
+            return create_collect_action(game_map[pos.X+1][pos.Y])
+        if game_map[pos.X-1][pos.Y].Content == 4:
+            return create_collect_action(game_map[pos.X-1][pos.Y])
+        if game_map[pos.X][pos.Y+1].Content == 4:
+            return create_collect_action(game_map[pos.X][pos.Y+1])
+        if game_map[pos.X][pos.Y-1].Content == 4:
+            return create_collect_action(game_map[pos.X][pos.Y-1])
+    return create_move_action(point)
 
 @app.route("/", methods=["POST"])
 def reponse():

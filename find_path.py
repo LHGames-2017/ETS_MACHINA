@@ -48,8 +48,7 @@ def is_adjacent_to_type(grid, pos, content):
 # grid : Tile[x][y]
 def find_path_helper(grid, paths, target, seen, targetOnly=True):
     if len(paths) == 0:
-        print "SOMETHING WRONG HAPPENED!!"
-        return ">"
+        return None
 
     # Take next path to test and remove it from queue
     tile = paths[0][0]
@@ -80,7 +79,7 @@ def find_path_helper(grid, paths, target, seen, targetOnly=True):
         paths.append([Tile(tile.Content, tile.X, tile.Y-1), path + "^"])
         seen.append(grid[tile.X][tile.Y-1])
 
-    return find_path_helper(grid, paths, target, seen)
+    return find_path_helper(grid, paths, target, seen, targetOnly)
 
 def find_shortest_path(grid, start, target):
     return find_path_helper(grid, [[start, ""]], target, [start])
