@@ -6,6 +6,7 @@ import numpy
 from savemap import save_map, get_map
 from state import StateMachine
 from mapping import Map
+import state
 
 # map_name is just some uuid
 from uuid import getnode as map_name

@@ -1,18 +1,35 @@
 from savemap import get_map, save_map
 import json
-from structs import TileContent
+from structs import TileContent, Tile
 
 class Map:
     def __init__(self, name, default=-1):
         self.name = name
-        self.tiles = [[]]
+        self.tiles = []
         self.default = default
+        data = get_map(name)
 
         try:
-            data = get_map(name)
             self.tiles = json.loads(data)
-        except:
+        except Exception as e:
             pass
+
+        width, height = self.size()
+
+        for x in range(width):
+            for y in range(height):
+                self.tiles[x][y] = Tile(self.tiles[x][y], x, y)
+
+    def save(self):
+        width, height = self.size()
+        tiles = []
+
+        for x in range(width):
+            tiles.append([])
+            for y in range(height):
+                tiles[-1].append(self.tiles[x][y].Content)
+
+        save_map(self.name, tiles)
 
     def contains(self, tile_content):
         for array in self.tiles:
@@ -32,14 +49,18 @@ class Map:
         down = player.Position + Point(0, 1)
 
         for point in [left, right, up, down]:
-            if self.at(point) == tile_content:
-                return point
+            if self.at(point).Content == tile_content:
+                return Tile(tile_content, point.X, point.Y)
 
         return None
 
-    def update(self, player, tiles):
+    def size(self):
         width = len(self.tiles)
         height = len(self.tiles[0]) if width > 0 else 0
+        return width, height
+
+    def update(self, player, tiles):
+        width, height = self.size()
 
         # yolo
         xmax = -100000
@@ -59,26 +80,31 @@ class Map:
         if player.HouseLocation.Y > ymax:
             ymax = player.HouseLocation.Y
 
-        for _ in range(xmax - width + 1):
-            self.tiles.append([self.default] * height)
+        for x in range(width, xmax + 1):
+            array = []
 
-        for array in self.tiles:
-            for _ in range(ymax - height + 1):
-                array.append(self.default)
+            for y in range(height):
+                array.append(Tile(self.default, x, y))
+
+            self.tiles.append(array)
+
+        for x in range(len(self.tiles)):
+            for y in range(height, ymax + 1):
+                self.tiles[x].append(Tile(self.default, x, y))
 
         changed = False
         for array in tiles:
             for tile in array:
                 content = tile.Content if tile.Content is not None else self.default
 
-                if self.tiles[tile.X][tile.Y] != content:
-                    self.tiles[tile.X][tile.Y] = content
+                if self.tiles[tile.X][tile.Y].Content != content:
+                    self.tiles[tile.X][tile.Y].Content = content
                     changed = True
 
-        self.tiles[player.HouseLocation.X][player.HouseLocation.Y] = TileContent.House
+        self.tiles[player.HouseLocation.X][player.HouseLocation.Y].Content = TileContent.House
 
         if changed or xmax != width - 1 or ymax != height - 1:
-            save_map(self.name, self.tiles)
+            self.save()
 
     def display(self):
         entity = {
@@ -92,13 +118,12 @@ class Map:
             6: 'P'
         }
 
-        width = len(self.tiles)
-        height = len(self.tiles[0]) if width > 0 else 0
+        width, height = self.size()
 
         for y in range(height):
             out = []
 
             for x in range(width):
-                out += [entity[self.tiles[x][y]]]
+                out += [entity[self.tiles[x][y].Content]]
 
             print ' '.join(out)

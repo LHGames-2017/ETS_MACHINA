@@ -41,15 +41,14 @@ def is_adjacent_to_type(grid, pos, content):
     down  = grid[pos.X][pos.Y+1]
     left  = grid[pos.X-1][pos.Y]
 
-    return up.Content == content or right.Content == content or down.Content  == content or left.Content  == content 
+    return up.Content == content or right.Content == content or down.Content  == content or left.Content  == content
 
 # paths: [path1, path2, ...]
 # path : [Tile, prev_path]
 # grid : Tile[x][y]
 def find_path_helper(grid, paths, target, seen, targetOnly=True):
     if len(paths) == 0:
-        print "SOMETHING WRONG HAPPENED!!"
-        return ">"
+        return None
 
     # Take next path to test and remove it from queue
     tile = paths[0][0]

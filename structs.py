@@ -55,7 +55,6 @@ class Tile(object):
         self.X = x
         self.Y = y
 
-
 class Player(object):
 
     def __init__(self, health, maxHealth, position, houseLocation, score, carriedRessources,
