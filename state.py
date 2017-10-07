@@ -55,7 +55,7 @@ class StateGatherRessources(State):
         if player.CarriedResources >= player.CarryingCapacity:
             return StateGoToHouse()
 
-        path = find_closest_tile(gameMap.tiles, player.Position, TileContent.Resource)
+        path = find_closest_tile(gameMap.tiles, Tile(TileContent.Player, player.Position.X, player.Position.Y), TileContent.Resource)
 
         if path is None:
             return StateRoam()
