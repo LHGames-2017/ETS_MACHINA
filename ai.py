@@ -66,7 +66,7 @@ def bot():
 
             otherPlayers.append({player_name: player_info })
 
-    return state_machine.run(player, map, otherPlayers)
+    return state_machine.run(player, deserialized_map, otherPlayers)
 
 @app.route("/", methods=["POST"])
 def reponse():

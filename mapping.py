@@ -39,4 +39,4 @@ class Map:
                 self.tiles[tile.X][tile.Y] = tile.Content
 
     def display():
-        for array in tiles
+        pass
