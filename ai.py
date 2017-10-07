@@ -3,29 +3,10 @@ from structs import *
 import json
 import numpy
 
+from savemap import save_map, get_map
+from state import StateMachine
+
 app = Flask(__name__)
-
-def create_action(action_type, target):
-    actionContent = ActionContent(action_type, target.__dict__)
-    return json.dumps(actionContent.__dict__)
-
-def create_move_action(target):
-    return create_action("MoveAction", target)
-
-def create_attack_action(target):
-    return create_action("AttackAction", target)
-
-def create_collect_action(target):
-    return create_action("CollectAction", target)
-
-def create_steal_action(target):
-    return create_action("StealAction", target)
-
-def create_heal_action():
-    return create_action("HealAction", "")
-
-def create_purchase_action(item):
-    return create_action("PurchaseAction", item)
 
 def deserialize_map(serialized_map):
     """
@@ -34,7 +15,7 @@ def deserialize_map(serialized_map):
     serialized_map = serialized_map[1:]
     rows = serialized_map.split('[')
     column = rows[0].split('{')
-    deserialized_map = [[Tile() for x in range(40)] for y in range(40)]
+    deserialized_map = [[Tile() for x in range(20)] for y in range(20)]
     for i in range(len(rows) - 1):
         column = rows[i + 1].split('{')
 
@@ -47,6 +28,8 @@ def deserialize_map(serialized_map):
             deserialized_map[i][j] = Tile(content, x, y)
 
     return deserialized_map
+
+state_machine = StateMachine()
 
 def bot():
     """
@@ -70,7 +53,7 @@ def bot():
     # Map
     serialized_map = map_json["CustomSerializedMap"]
     deserialized_map = deserialize_map(serialized_map)
-
+    print deserialized_map[0]
     otherPlayers = []
 
     for player_dict in map_json["OtherPlayers"]:
@@ -83,8 +66,7 @@ def bot():
 
             otherPlayers.append({player_name: player_info })
 
-    # return decision
-    return create_move_action(Point(0,1))
+    return state_machine.run(player, map, otherPlayers)
 
 @app.route("/", methods=["POST"])
 def reponse():
@@ -94,4 +76,4 @@ def reponse():
     return bot()
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=3000)
+    app.run(host="0.0.0.0", port=8080)
