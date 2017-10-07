@@ -58,13 +58,16 @@ def bot():
     # Map
     serialized_map = map_json["CustomSerializedMap"]
     deserialized_map = deserialize_map(serialized_map)
-    game_map.update(deserialized_map)
 
     otherPlayers = []
 
     for player_dict in map_json["OtherPlayers"]:
         for player_name in player_dict.keys():
             player_info = player_dict[player_name]
+
+            if player_info == "notAPlayer":
+                continue
+            
             p_pos = player_info["Position"]
             player_info = PlayerInfo(player_info["Health"],
                                      player_info["MaxHealth"],
@@ -72,7 +75,10 @@ def bot():
 
             otherPlayers.append({player_name: player_info })
 
-    return state_machine.run(player, deserialized_map, otherPlayers)
+    game_map.update(player, deserialized_map)
+    game_map.display()
+
+    return state_machine.run(player, game_map, otherPlayers)
 
 @app.route("/", methods=["POST"])
 def reponse():

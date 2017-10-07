@@ -1,5 +1,6 @@
 from savemap import get_map, save_map
 import json
+from structs import TileContent
 
 class Map:
     def __init__(self, name):
@@ -12,7 +13,15 @@ class Map:
         except:
             pass
 
-    def update(self, tiles):
+    def contains(self, tile_content):
+        for array in self.tiles:
+            for tile in self.tiles:
+                if tile == tile_content:
+                    return True
+
+        return False
+
+    def update(self, player, tiles):
         width = len(self.tiles)
         height = len(self.tiles[0]) if width > 0 else 0
 
@@ -28,6 +37,11 @@ class Map:
                 if tile.Y > ymax:
                     ymax = tile.Y
 
+        if player.HouseLocation.X > xmax:
+            xmax = player.HouseLocation.X
+
+        if player.HouseLocation.Y > ymax:
+            ymax = player.HouseLocation.Y
 
         for _ in range(xmax - width + 1):
             self.tiles.append([-1] * height)
@@ -45,6 +59,8 @@ class Map:
                     self.tiles[tile.X][tile.Y] = content
                     changed = True
 
+        self.tiles[player.HouseLocation.X][player.HouseLocation.Y] = TileContent.House
+
         if changed or xmax != width - 1 or ymax != height - 1:
             save_map(self.name, self.tiles)
 
@@ -54,10 +70,10 @@ class Map:
             0: ' ',
             1: '#',
             2: 'H',
-            3: 'P',
+            3: 'L',
             4: 'R',
-            5: '~',
-            6: 'S'
+            5: 'S',
+            6: 'P'
         }
 
         width = len(self.tiles)
