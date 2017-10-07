@@ -112,6 +112,10 @@ def bot():
     for player_dict in map_json["OtherPlayers"]:
         for player_name in player_dict.keys():
             player_info = player_dict[player_name]
+
+            if player_info == "notAPlayer":
+                continue
+
             p_pos = player_info["Position"]
             player_info = PlayerInfo(player_info["Health"],
                                      player_info["MaxHealth"],
@@ -130,7 +134,7 @@ def bot():
 
     if target != None and pos != None:
         game_map = create_usable_map(deserialized_map, player.Position)
-        path = find_closest_tile(game_map, pos, 2)
+        path = find_closest_tile(game_map, pos, 3)
         print path
         #path  = find_shortest_path(game_map, pos, target)
         point = move_to_path(player.Position, path)
