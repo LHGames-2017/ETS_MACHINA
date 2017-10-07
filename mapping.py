@@ -3,9 +3,10 @@ import json
 from structs import TileContent
 
 class Map:
-    def __init__(self, name):
+    def __init__(self, name, default=-1):
         self.name = name
         self.tiles = [[]]
+        self.default = default
 
         try:
             data = get_map(name)
@@ -20,6 +21,21 @@ class Map:
                     return True
 
         return False
+
+    def at(point):
+        return self.tiles[point.X][point.Y]
+
+    def touch(self, player, tile_content):
+        left = player.Position + Point(-1, 0)
+        right = player.Position + Point(1, 0)
+        up = player.Position + Point(0, -1)
+        down = player.Position + Point(0, 1)
+
+        for point in [left, right, up, down]:
+            if self.at(point) == tile_content:
+                return point
+
+        return None
 
     def update(self, player, tiles):
         width = len(self.tiles)
@@ -44,16 +60,16 @@ class Map:
             ymax = player.HouseLocation.Y
 
         for _ in range(xmax - width + 1):
-            self.tiles.append([-1] * height)
+            self.tiles.append([self.default] * height)
 
         for array in self.tiles:
             for _ in range(ymax - height + 1):
-                array.append(-1)
+                array.append(self.default)
 
         changed = False
         for array in tiles:
             for tile in array:
-                content = tile.Content if tile.Content is not None else -1
+                content = tile.Content if tile.Content is not None else self.default
 
                 if self.tiles[tile.X][tile.Y] != content:
                     self.tiles[tile.X][tile.Y] = content
@@ -66,7 +82,7 @@ class Map:
 
     def display(self):
         entity = {
-            -1: '?',
+            self.default: '?',
             0: ' ',
             1: '#',
             2: 'H',
