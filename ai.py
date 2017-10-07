@@ -5,6 +5,10 @@ import numpy
 
 from savemap import save_map, get_map
 from state import StateMachine
+from mapping import Map
+
+# map_name is just some uuid
+from uuid import getnode as map_name
 
 app = Flask(__name__)
 
@@ -30,6 +34,7 @@ def deserialize_map(serialized_map):
     return deserialized_map
 
 state_machine = StateMachine()
+game_map = Map(map_name())
 
 def bot():
     """
@@ -53,7 +58,8 @@ def bot():
     # Map
     serialized_map = map_json["CustomSerializedMap"]
     deserialized_map = deserialize_map(serialized_map)
-    print deserialized_map[0]
+    game_map.update(deserialized_map)
+
     otherPlayers = []
 
     for player_dict in map_json["OtherPlayers"]:
