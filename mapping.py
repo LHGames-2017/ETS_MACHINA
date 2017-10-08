@@ -7,6 +7,8 @@ class Map:
         self.name = name
         self.tiles = []
         self.default = default
+
+        # Get the map from the server
         data = get_map(name)
 
         try:
@@ -20,6 +22,7 @@ class Map:
             for y in range(height):
                 self.tiles[x][y] = Tile(self.tiles[x][y], x, y)
 
+    # Save the map to the server
     def save(self):
         width, height = self.size()
         tiles = []
@@ -42,6 +45,7 @@ class Map:
     def at(self, point):
         return self.tiles[point.X][point.Y]
 
+    # Get the position of the tile next to the player with given content
     def touch(self, player, tile_content):
         left = player.Position + Point(-1, 0)
         right = player.Position + Point(1, 0)
@@ -59,6 +63,7 @@ class Map:
         height = len(self.tiles[0]) if width > 0 else 0
         return width, height
 
+    # Update the map with the information given from the server
     def update(self, player, tiles):
         width, height = self.size()
 

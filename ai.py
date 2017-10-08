@@ -11,7 +11,7 @@ import state
 # map_name is just some uuid
 from uuid import getnode as map_name
 
-from find_path import a_star, find_closest_tile, find_shortest_path
+from find_path import find_closest_tile, find_shortest_path
 
 app = Flask(__name__)
 
@@ -96,4 +96,4 @@ def reponse():
     return bot()
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=3000)
+    app.run(host="0.0.0.0", port=8080)
